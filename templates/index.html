@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Stats Dashboard - Dark Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c;
+            /* Tailwind gray-900 */
+            color: #e2e8f0;
+            /* Tailwind slate-200 */
+        }
+
+        .player-checkbox-label {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #2d3748;
+            border: 1px solid #4a5568;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            color: #cbd5e0;
+        }
+
+        .player-checkbox-label:hover {
+            border-color: #4299e1;
+            /* blue-500 */
+            background-color: #4a5568;
+            /* gray-700 */
+        }
+
+        .player-checkbox-label input[type="checkbox"] {
+            margin-right: 0.75rem;
+            height: 1.25rem;
+            width: 1.25rem;
+            accent-color: #4299e1;
+            border-radius: 0.25rem;
+            border: 1px solid #4a5568;
+        }
+
+        .btn-secondary {
+            background-color: #4a5568;
+            /* gray-700 */
+            color: white;
+            font-weight: 500;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            /* rounded-md */
+            transition: background-color 0.2s ease-in-out;
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #2d3748;
+            /* gray-800 */
+        }
+
+        .chart-container {
+            position: relative;
+            min-height: 400px;
+            height: 65vh;
+            width: 100%;
+            margin-top: 1.25rem;
+            /* mt-5 */
+            background-color: #2d3748;
+            /* Tailwind gray-800 */
+            padding: 1.25rem;
+            /* p-5 */
+            border-radius: 0.75rem;
+            /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+        }
+
+        select,
+        input[type="text"] {
+            background-color: #2d3748;
+            /* gray-800 */
+            color: #e2e8f0;
+            /* slate-200 */
+            border: 1px solid #4a5568;
+            /* gray-700 */
+            border-radius: 0.5rem;
+            padding: 0.625rem 0.875rem;
+            transition: all 0.15s ease-in-out;
+        }
+
+        select:focus,
+        input[type="text"]:focus {
+            border-color: #4299e1;
+            /* blue-500 */
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.4);
+            /* blue-500 focus ring */
+            outline: none;
+        }
+
+        option {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            display: block;
+            font-weight: 500;
+            color: #a0aec0;
+            /* gray-400 */
+        }
+
+        .player-checkbox-label input[type="checkbox"]:checked+span {
+            color: #63b3ed;
+            /* blue-400 */
+            font-weight: 600;
+        }
+
+        .control-panel-section {
+            background-color: #2d3748;
+            /* gray-800 */
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-primary {
+            background-color: #3182ce;
+            /* blue-600 */
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #2b6cb0;
+            /* blue-700 */
+        }
+
+        .btn-primary i {
+            margin-right: 0.5rem;
+        }
+
+        #player-checkboxes::-webkit-scrollbar,
+        #advancement-select::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #player-checkboxes::-webkit-scrollbar-track,
+        #advancement-select::-webkit-scrollbar-track {
+            background: #1a202c;
+            /* gray-900 */
+            border-radius: 10px;
+        }
+
+        #player-checkboxes::-webkit-scrollbar-thumb,
+        #advancement-select::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            /* gray-700 */
+            border-radius: 10px;
+        }
+
+        #player-checkboxes::-webkit-scrollbar-thumb:hover,
+        #advancement-select::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+            /* gray-600 */
+        }
+
+        #advancement-search {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23A0AEC0'%3E%3Cpath fill-rule='evenodd' d='M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z' clip-rule='evenodd' /%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: 0.75rem center;
+            background-size: 1rem 1rem;
+            padding-left: 2.5rem;
+        }
+
+        header h1 {
+            color: #63b3ed;
+            /* blue-400 */
+        }
+
+        header p {
+            color: #a0aec0;
+            /* gray-400 */
+        }
+
+        .control-panel-section h2 {
+            color: #63b3ed;
+            /* blue-400 */
+        }
+
+        #chart-message {
+            color: #a0aec0;
+            /* gray-400 */
+        }
+    </style>
+</head>
+
+<body class="p-4 md:p-8">
+    <div class="container mx-auto max-w-screen-2xl">
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold flex items-center justify-center">
+                <i class="fas fa-chart-line mr-3"></i> Minecraft Stats & Advancements Dashboard
+            </h1>
+            <p class="text-lg mt-2">Visualize and compare your Minecraft journey!</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-4">
+                <div class="control-panel-section">
+                    <h2 class="text-2xl font-semibold mb-5 flex items-center">
+                        <i class="fas fa-users mr-2"></i>Player Selection
+                    </h2>
+                    <div class="flex space-x-2 mb-3">
+                        <button id="select-all-players-btn" class="btn-secondary text-xs">Select All</button>
+                        <button id="deselect-all-players-btn" class="btn-secondary text-xs">Deselect All</button>
+                    </div>
+                    <div id="player-checkboxes" class="space-y-3 max-h-80 overflow-y-auto p-1">
+                        <p id="player-loading-message" class="text-gray-400">Loading players...</p>
+                    </div>
+                </div>
+
+                <div class="control-panel-section">
+                    <h2 class="text-2xl font-semibold mb-5 flex items-center">
+                        <i class="fas fa-sliders-h mr-2"></i>Chart Configuration
+                    </h2>
+                    <div class="mb-4">
+                        <label for="data-type-select">Data Type:</label>
+                        <select id="data-type-select" class="w-full">
+                            <option value="stats">Statistics</option>
+                            <option value="advancements">Advancements</option>
+                        </select>
+                    </div>
+
+                    <div id="stats-controls" class="mb-4 space-y-4">
+                        <div>
+                            <label for="stat-category-select">Statistic Category:</label>
+                            <select id="stat-category-select" class="w-full mb-2">
+                            </select>
+                        </div>
+                        <div>
+                            <label for="specific-stat-select">Specific Statistic:</label>
+                            <div class="flex items-center space-x-2">
+                                <select id="specific-stat-select" class="w-full">
+                                </select>
+                                <button id="sort-specific-stats-btn" class="btn-primary p-2.5 rounded-md"
+                                    title="Sort items by count">
+                                    <i class="fas fa-sort-amount-down"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NEW: Advancement filter controls -->
+                    <div id="advancements-controls" class="mb-4 space-y-4 hidden">
+                        <div>
+                            <label for="advancement-category-select">Advancement Category:</label>
+                            <select id="advancement-category-select" class="w-full"></select>
+                        </div>
+                        <div>
+                            <label for="advancement-search">Search Advancement:</label>
+                            <input type="text" id="advancement-search"
+                                placeholder="E.g., Stone Age, Cover Me In Debris" class="w-full">
+                        </div>
+                        <div>
+                            <label for="advancement-select">Select Advancement:</label>
+                            <select id="advancement-select" class="w-full" size="8">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label for="chart-type-select">Chart Type:</label>
+                        <select id="chart-type-select" class="w-full">
+                            <option value="bar">Bar Chart</option>
+                            <option value="pie">Pie Chart</option>
+                            <option value="doughnut">Doughnut Chart</option>
+                            <option value="line">Line Chart</option>
+                            <option value="radar">Radar Chart</option>
+                            <option value="polarArea">Polar Area Chart</option>
+                        </select>
+                    </div>
+                    <div class="mb-6 flex items-center">
+                        <input type="checkbox" id="sort-by-impressive-checkbox"
+                            class="mr-2 h-5 w-5 accent-blue-500">
+                        <label for="sort-by-impressive-checkbox" class="text-sm">Sort Chart by Value</label>
+                    </div>
+
+                    <button id="generate-chart-btn" class="w-full btn-primary">
+                        <i class="fas fa-sync-alt fa-spin mr-2 hidden" id="loading-spinner"></i> <i
+                            class="fas fa-magic mr-2" id="magic-icon"></i>Generate Chart
+                    </button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8">
+                <div class="chart-container">
+                    <canvas id="statsChart"></canvas>
+                    <div id="chart-message"
+                        class="absolute inset-0 flex items-center justify-center text-xl p-4 text-center">
+                        Select options and click "Generate Chart" to visualize data.
+                    </div>
+                </div>
+                <div class="mt-6 bg-gray-800 p-6 rounded-xl shadow-lg hidden" id="raw-data-container">
+                    <h3 class="text-xl font-semibold mb-3 text-blue-400">Selected Data Preview (for debugging)</h3>
+                    <pre id="raw-data-preview"
+                        class="bg-gray-900 text-gray-300 p-4 rounded-lg text-xs overflow-x-auto max-h-60"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        Chart.register(ChartDataLabels); // Register the datalabels plugin
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Element selectors
+            const playerCheckboxesDiv = document.getElementById('player-checkboxes');
+            const playerLoadingMessage = document.getElementById('player-loading-message');
+            const dataTypeSelect = document.getElementById('data-type-select');
+            const statsControlsDiv = document.getElementById('stats-controls');
+            const statCategorySelect = document.getElementById('stat-category-select');
+            const specificStatSelect = document.getElementById('specific-stat-select');
+            const advancementsControlsDiv = document.getElementById('advancements-controls');
+            const advancementCategorySelect = document.getElementById('advancement-category-select'); // NEW
+            const advancementSelect = document.getElementById('advancement-select');
+            const advancementSearchInput = document.getElementById('advancement-search');
+            const chartTypeSelect = document.getElementById('chart-type-select');
+            const generateChartBtn = document.getElementById('generate-chart-btn');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const magicIcon = document.getElementById('magic-icon');
+            const chartMessage = document.getElementById('chart-message');
+            const rawDataContainer = document.getElementById('raw-data-container');
+            const rawDataPreview = document.getElementById('raw-data-preview');
+            const selectAllPlayersBtn = document.getElementById('select-all-players-btn');
+            const deselectAllPlayersBtn = document.getElementById('deselect-all-players-btn');
+            const sortSpecificStatsBtn = document.getElementById('sort-specific-stats-btn');
+            const sortByImpressiveCheckbox = document.getElementById('sort-by-impressive-checkbox');
+
+            // Global state variables
+            let statsChart = null; // Holds the Chart.js instance
+            let allPlayersData = {}; // Cache for fetched player data { playerId: data }
+            let allAdvancementsList = []; // List of all available advancements {id, name, desc, cat}
+            let allStatsCategories = {}; // { category: [stat_ids] }
+
+            // Default Chart.js options for dark theme
+            Chart.defaults.color = '#e2e8f0'; // Tailwind slate-200 for general chart text
+            Chart.defaults.borderColor = '#4a5568'; // Tailwind gray-700 for grid lines
+
+            // Categories for which sub-item sorting is applicable
+            const sortableStatSubItemsCategories = [
+                "minecraft:mined", "minecraft:crafted", "minecraft:used",
+                "minecraft:broken", "minecraft:picked_up", "minecraft:dropped", "minecraft:killed"
+            ];
+
+            // Initializes the dashboard by fetching necessary data
+            async function initializeDashboard() {
+                setLoadingState(true);
+                await fetchPlayers();
+                await Promise.all([
+                    fetchStatsCategories(),
+                    fetchAdvancementsList()
+                ]);
+                updateControlsVisibility();
+                sortSpecificStatsBtn.disabled = true;
+                sortSpecificStatsBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                sortSpecificStatsBtn.title = 'Select a category first';
+                setLoadingState(false);
+            }
+
+            // Manages loading spinner and button states
+            function setLoadingState(isLoading) {
+                if (isLoading) {
+                    loadingSpinner.classList.remove('hidden');
+                    magicIcon.classList.add('hidden');
+                    generateChartBtn.disabled = true;
+                    sortSpecificStatsBtn.disabled = true;
+                } else {
+                    loadingSpinner.classList.add('hidden');
+                    magicIcon.classList.remove('hidden');
+                    generateChartBtn.disabled = false;
+                    const selectedCategory = statCategorySelect.value;
+                    if (sortableStatSubItemsCategories.includes(selectedCategory)) {
+                        sortSpecificStatsBtn.disabled = false;
+                        sortSpecificStatsBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        sortSpecificStatsBtn.disabled = true;
+                        sortSpecificStatsBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+            }
+
+            // Fetches the list of players from the backend
+            async function fetchPlayers() {
+                try {
+                    const response = await fetch('/api/players');
+                    const players = await response.json();
+                    playerCheckboxesDiv.innerHTML = '';
+                    if (players.length === 0) {
+                        playerCheckboxesDiv.innerHTML = '<p class="text-gray-400 p-2">No player data files found.</p>';
+                        selectAllPlayersBtn.disabled = true;
+                        deselectAllPlayersBtn.disabled = true;
+                        playerLoadingMessage.classList.add('hidden');
+                        return;
+                    }
+                    players.forEach(player => {
+                        const checkboxId = `player-${player.id.replace(/[^a-zA-Z0-9_-]/g, "")}`;
+                        const label = document.createElement('label');
+                        label.htmlFor = checkboxId;
+                        label.className = 'player-checkbox-label items-center';
+
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = checkboxId;
+                        checkbox.value = player.id;
+                        checkbox.name = 'players';
+                        checkbox.className = 'form-checkbox h-5 w-5 accent-blue-500';
+
+                        const span = document.createElement('span');
+                        let playerLabelText = player.display_name;
+                        if (player.type === 'java') {
+                            playerLabelText += ` <i class="fab fa-java text-orange-400" title="Java Edition"></i>`;
+                        } else if (player.type === 'bedrock') {
+                            playerLabelText += ` <i class="fab fa-xbox text-green-400" title="Bedrock/Xbox"></i>`;
+                        }
+                        let dataAvailable = [];
+                        if (player.has_stats) dataAvailable.push("S");
+                        if (player.has_advancements) dataAvailable.push("A");
+                        if (dataAvailable.length > 0) playerLabelText += ` <span class="text-xs text-gray-500">[${dataAvailable.join(',')}]</span>`;
+
+                        span.innerHTML = playerLabelText;
+                        span.className = 'ml-2 flex-grow';
+
+                        label.appendChild(checkbox);
+                        label.appendChild(span);
+                        playerCheckboxesDiv.appendChild(label);
+                    });
+                    selectAllPlayersBtn.disabled = false;
+                    deselectAllPlayersBtn.disabled = false;
+                    playerLoadingMessage.classList.add('hidden');
+                } catch (error) {
+                    console.error('Error fetching players:', error);
+                    playerCheckboxesDiv.innerHTML = '<p class="text-red-400 p-2">Error loading players.</p>';
+                    selectAllPlayersBtn.disabled = true;
+                    deselectAllPlayersBtn.disabled = true;
+                    playerLoadingMessage.classList.add('hidden');
+                }
+            }
+
+            // Event listeners for player selection buttons
+            selectAllPlayersBtn.addEventListener('click', () => {
+                playerCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+            });
+
+            deselectAllPlayersBtn.addEventListener('click', () => {
+                playerCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            });
+
+            // Fetches statistics categories
+            async function fetchStatsCategories() {
+                try {
+                    const response = await fetch('/api/stats_categories');
+                    allStatsCategories = await response.json();
+                    statCategorySelect.innerHTML = '<option value="">-- Select Category --</option>';
+                    Object.keys(allStatsCategories).sort().forEach(category => {
+                        if (allStatsCategories[category].length > 0) {
+                            const option = document.createElement('option');
+                            option.value = category;
+                            option.textContent = category.replace('minecraft:', '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                            statCategorySelect.appendChild(option);
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error fetching stat categories:', error);
+                    statCategorySelect.innerHTML = '<option value="">Error</option>';
+                }
+            }
+
+            // Fetches all advancements and populates category filter
+            async function fetchAdvancementsList() {
+                try {
+                    const response = await fetch('/api/advancements_list');
+                    allAdvancementsList = await response.json();
+                    if (!Array.isArray(allAdvancementsList)) {
+                        allAdvancementsList = [];
+                    }
+
+                    // NEW: Populate category filter
+                    const categories = ['All', ...new Set(allAdvancementsList.map(adv => adv.cat).filter(Boolean))].sort();
+                    advancementCategorySelect.innerHTML = '';
+                    categories.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat;
+                        option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+                        advancementCategorySelect.appendChild(option);
+                    });
+                    
+                    filterAndDisplayAdvancements(); // Initial population
+                } catch (error) {
+                    console.error('Error fetching advancements list:', error);
+                    allAdvancementsList = [];
+                    filterAndDisplayAdvancements();
+                }
+            }
+            
+            // NEW: Central function to filter and display advancements
+            function filterAndDisplayAdvancements() {
+                const searchTerm = advancementSearchInput.value.toLowerCase();
+                const selectedCategory = advancementCategorySelect.value;
+                
+                let filtered = allAdvancementsList;
+
+                if (selectedCategory && selectedCategory !== 'All') {
+                    filtered = filtered.filter(adv => adv.cat === selectedCategory);
+                }
+
+                if (searchTerm) {
+                    filtered = filtered.filter(adv =>
+                        (adv.name && adv.name.toLowerCase().includes(searchTerm)) ||
+                        (adv.id && adv.id.toLowerCase().includes(searchTerm))
+                    );
+                }
+
+                populateAdvancementSelect(filtered);
+            }
+
+            // Populates the advancement select dropdown from a given list
+            function populateAdvancementSelect(advancements) {
+                advancementSelect.innerHTML = '';
+                if (!advancements || advancements.length === 0) {
+                    const option = document.createElement('option');
+                    option.textContent = 'No advancements match filter.';
+                    option.disabled = true;
+                    advancementSelect.appendChild(option);
+                    return;
+                }
+                advancements.forEach(adv => {
+                    if (adv && adv.id && adv.name) {
+                        const option = document.createElement('option');
+                        option.value = adv.id;
+                        option.textContent = adv.name;
+                        advancementSelect.appendChild(option);
+                    }
+                });
+            }
+
+            // NEW: Event listeners for advancement filters
+            advancementSearchInput.addEventListener('input', filterAndDisplayAdvancements);
+            advancementCategorySelect.addEventListener('change', filterAndDisplayAdvancements);
+
+            // Populates specific stats dropdown
+            function populateSpecificStatsDropdown(statItemIds) {
+                const current = specificStatSelect.value;
+                specificStatSelect.innerHTML = '<option value="">-- Select Statistic --</option>';
+                if (statItemIds && statItemIds.length > 0) {
+                    statItemIds.forEach(statId => {
+                        const option = document.createElement('option');
+                        option.value = statId;
+                        let name = statId.replace('minecraft:', '').replace(/_/g, ' ');
+                        option.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+                        specificStatSelect.appendChild(option);
+                    });
+                    if (statItemIds.includes(current)) {
+                        specificStatSelect.value = current;
+                    }
+                }
+            }
+
+            // Handles change in stats category
+            statCategorySelect.addEventListener('change', function () {
+                const cat = this.value;
+                if (cat && allStatsCategories[cat]) {
+                    populateSpecificStatsDropdown([...allStatsCategories[cat]].sort());
+                    if (sortableStatSubItemsCategories.includes(cat)) {
+                        sortSpecificStatsBtn.disabled = false;
+                        sortSpecificStatsBtn.title = `Sort items by count`;
+                        sortSpecificStatsBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        sortSpecificStatsBtn.disabled = true;
+                        sortSpecificStatsBtn.title = 'Sorting not applicable';
+                        sortSpecificStatsBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                } else {
+                    populateSpecificStatsDropdown([]);
+                    sortSpecificStatsBtn.disabled = true;
+                    sortSpecificStatsBtn.title = 'Select a category first';
+                    sortSpecificStatsBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            });
+
+            // Sorts specific stat items by value
+            sortSpecificStatsBtn.addEventListener('click', async () => {
+                const playerIds = Array.from(playerCheckboxesDiv.querySelectorAll('input:checked')).map(cb => cb.value);
+                const category = statCategorySelect.value;
+                if (!category || !sortableStatSubItemsCategories.includes(category)) return;
+                if (playerIds.length === 0) {
+                    populateSpecificStatsDropdown([...allStatsCategories[category]].sort());
+                    return;
+                }
+                setLoadingState(true);
+                const playersData = await getSelectedPlayerData(playerIds);
+                setLoadingState(false);
+                if (!playersData || playersData.some(p => !p || p.error)) return;
+
+                const totals = {};
+                if (allStatsCategories[category]) {
+                    allStatsCategories[category].forEach(statId => {
+                        totals[statId] = playersData.reduce((sum, player) => {
+                            return sum + (player?.stats_data?.stats?.[category]?.[statId] || 0);
+                        }, 0);
+                    });
+                }
+                const sortedIds = Object.keys(totals).sort((a, b) => totals[b] - totals[a]);
+                populateSpecificStatsDropdown(sortedIds);
+                if (specificStatSelect.options.length > 1) {
+                    specificStatSelect.value = specificStatSelect.options[1].value;
+                }
+            });
+
+            // Updates visibility of control panels
+            dataTypeSelect.addEventListener('change', updateControlsVisibility);
+            function updateControlsVisibility() {
+                const isStats = dataTypeSelect.value === 'stats';
+                statsControlsDiv.classList.toggle('hidden', !isStats);
+                advancementsControlsDiv.classList.toggle('hidden', isStats);
+            }
+
+            // Fetches data for selected players
+            async function getSelectedPlayerData(playerIds) {
+                const data = [];
+                for (const id of playerIds) {
+                    if (!allPlayersData[id]) {
+                        try {
+                            const res = await fetch(`/api/player_data/${id}`);
+                            if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+                            allPlayersData[id] = await res.json();
+                        } catch (error) {
+                            console.error(`Error fetching for ${id}:`, error);
+                            allPlayersData[id] = { id, username: `Error`, error: true };
+                        }
+                    }
+                    if (allPlayersData[id]) data.push(allPlayersData[id]);
+                }
+                return data.filter(p => p && !p.error);
+            }
+
+            // Main function to generate chart
+            generateChartBtn.addEventListener('click', async () => {
+                const ids = Array.from(playerCheckboxesDiv.querySelectorAll('input:checked')).map(cb => cb.value);
+                if (ids.length === 0) {
+                    chartMessage.textContent = 'Please select a player.';
+                    chartMessage.classList.remove('hidden');
+                    if (statsChart) statsChart.destroy();
+                    return;
+                }
+
+                setLoadingState(true);
+                chartMessage.textContent = 'Generating chart...';
+                chartMessage.classList.remove('hidden');
+                if (statsChart) statsChart.clear();
+
+                const playersData = await getSelectedPlayerData(ids);
+                if (!playersData || playersData.length === 0) {
+                    setLoadingState(false);
+                    chartMessage.textContent = 'No valid data for selected players.';
+                    if (statsChart) statsChart.destroy();
+                    return;
+                }
+
+                let dataPoints = [];
+                let chartTitle = '';
+                const dataType = dataTypeSelect.value;
+
+                if (dataType === 'stats') {
+                    const cat = statCategorySelect.value;
+                    const stat = specificStatSelect.value;
+                    if (!cat || !stat) {
+                        chartMessage.textContent = 'Please select a stat category and item.';
+                        setLoadingState(false);
+                        return;
+                    }
+                    chartTitle = `${statCategorySelect.options[statCategorySelect.selectedIndex].text}: ${specificStatSelect.options[specificStatSelect.selectedIndex].text}`;
+                    dataPoints = playersData.map(p => ({
+                        label: p.username,
+                        value: p.stats_data?.stats?.[cat]?.[stat] || 0
+                    }));
+                } else { // Advancements
+                    const advId = advancementSelect.value;
+                    if (!advId) {
+                        chartMessage.textContent = 'Please select an advancement.';
+                        setLoadingState(false);
+                        return;
+                    }
+                    const advDef = allAdvancementsList.find(a => a.id === advId);
+                    chartTitle = [advDef?.name || advId, advDef?.desc || ''];
+                    dataPoints = playersData.map(p => ({
+                        label: p.username,
+                        value: p.advancements_data?.[advId]?.done ? 1 : 0
+                    }));
+                }
+
+                rawDataPreview.textContent = JSON.stringify(dataPoints, null, 2);
+                rawDataContainer.classList.remove('hidden');
+                
+                if (sortByImpressiveCheckbox.checked) {
+                    dataPoints.sort((a, b) => b.value - a.value);
+                }
+                
+                setLoadingState(false);
+                renderChart(dataPoints, chartTitle, chartTypeSelect.value, dataType);
+            });
+
+            // Renders the chart
+            function renderChart(dataPoints, title, type, dataType) {
+                const ctx = document.getElementById('statsChart').getContext('2d');
+                if (statsChart) {
+                    statsChart.destroy();
+                }
+
+                const labels = dataPoints.map(d => d.label);
+                const values = dataPoints.map(d => d.value);
+
+                const colorPalette = ['#2563eb', '#db2777', '#f59e0b', '#10b981', '#8b5cf6', '#38bdf8', '#ec4899', '#facc15', '#34d399', '#a78bfa'];
+                const backgroundColors = labels.map((_, i) => colorPalette[i % colorPalette.length] + 'BF');
+                const borderColors = labels.map((_, i) => colorPalette[i % colorPalette.length]);
+
+                let chartConfig = {
+                    type: type,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: Array.isArray(title) ? title[0] : title,
+                            data: values,
+                            backgroundColor: backgroundColors,
+                            borderColor: borderColors,
+                            borderWidth: 1.5,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            // UPDATED: Hide legend for advancements, show for stats
+                            legend: {
+                                display: dataType !== 'advancements',
+                                position: 'top',
+                                labels: { color: '#e2e8f0', font: { family: 'Inter' } }
+                            },
+                            title: {
+                                display: true,
+                                text: title,
+                                color: '#e2e8f0',
+                                font: { size: 20, weight: '600', family: 'Inter' },
+                                padding: { top: 10, bottom: 20 }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (c) => dataType === 'advancements' ? `${c.label}: ${c.raw === 1 ? 'Completed' : 'Not Completed'}` : `${c.label}: ${c.formattedValue}`
+                                }
+                            },
+                            datalabels: {
+                                display: (type === 'pie' || type === 'doughnut'),
+                                color: '#fff',
+                                font: { weight: 'bold' },
+                                formatter: (val, ctx) => {
+                                    if (dataType === 'advancements') return val === 1 ? 'Done' : '';
+                                    let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    let pct = sum > 0 ? (val * 100 / sum).toFixed(1) + "%" : "0%";
+                                    return val > 0 ? `${val}\n(${pct})` : '';
+                                }
+                            }
+                        },
+                        scales: (type === 'pie' || type === 'doughnut' || type === 'polarArea' || type === 'radar') ? {} : {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: '#a0aec0' },
+                                grid: { color: '#4a5568' }
+                            },
+                            x: { ticks: { color: '#a0aec0' }, grid: { color: '#4a5568' } }
+                        }
+                    }
+                };
+                
+                if (dataType === 'advancements' && (type === 'bar' || type === 'line')) {
+                    chartConfig.options.scales.y.max = 1;
+                    chartConfig.options.scales.y.ticks.stepSize = 1;
+                    chartConfig.options.scales.y.ticks.callback = val => val === 1 ? 'Completed' : 'Not Done';
+                }
+
+                statsChart = new Chart(ctx, chartConfig);
+                chartMessage.classList.add('hidden');
+            }
+
+            initializeDashboard();
+        });
+    </script>
+</body>
+</html>
