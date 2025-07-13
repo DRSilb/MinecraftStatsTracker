@@ -3,6 +3,6 @@
 
 Visit:
 
-https://drsilb.pythonanywhere.com/
+https://minecraftstatstracker.com/
 
 to see!
