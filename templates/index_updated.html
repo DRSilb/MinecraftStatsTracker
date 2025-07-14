@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Stats Dashboard - Dark Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .control-panel-section {
+            background-color: #2d3748;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+            margin-bottom: 1.5rem;
+        }
+        .player-checkbox-label {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #2d3748;
+            border: 1px solid #4a5568;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            color: #cbd5e0;
+        }
+        .player-checkbox-label:hover {
+            border-color: #4299e1;
+            background-color: #4a5568;
+        }
+        .player-checkbox-label input[type="checkbox"] {
+            margin-right: 0.75rem;
+            height: 1.25rem;
+            width: 1.25rem;
+            accent-color: #4299e1;
+        }
+        .player-checkbox-label input[type="checkbox"]:checked+span {
+            color: #63b3ed;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background-color: #3182ce;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            background-color: #2b6cb0;
+        }
+        .btn-primary:disabled {
+            background-color: #2d3748;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .btn-secondary {
+            background-color: #4a5568;
+            color: white;
+            font-weight: 500;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out;
+            border: none;
+        }
+        .btn-secondary:hover {
+            background-color: #2d3748;
+        }
+        .chart-container {
+            position: relative;
+            min-height: 400px;
+            height: 65vh;
+            width: 100%;
+            margin-top: 1.25rem;
+            background-color: #2d3748;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+        }
+        select, input[type="text"] {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            border: 1px solid #4a5568;
+            border-radius: 0.5rem;
+            padding: 0.625rem 0.875rem;
+            transition: all 0.15s ease-in-out;
+        }
+        select:focus, input[type="text"]:focus {
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.4);
+            outline: none;
+        }
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #2d3748;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        input[type="file"] {
+            background-color: #4a5568;
+            border: 1px dashed #718096;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+        input[type="file"]::file-selector-button {
+            background-color: #3182ce;
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+    </style>
+</head>
+
+<body class="p-4 md:p-8">
+    <div class="container mx-auto max-w-screen-2xl">
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold flex items-center justify-center text-blue-400">
+                <i class="fas fa-chart-line mr-3"></i> Minecraft Stats & Advancements Dashboard
+            </h1>
+            <p class="text-lg mt-2 text-gray-400">Visualize and compare your Minecraft journey!</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-4">
+                <div class="control-panel-section">
+                    <h2 class="text-2xl font-semibold mb-4 flex items-center text-blue-400">
+                        <i class="fas fa-upload mr-2"></i>Import Your Data
+                    </h2>
+                    <p class="text-sm text-gray-400 mb-4">Upload your own stats & advancements files. The stats filename must be your UUID.</p>
+                    <button id="show-import-modal-btn" class="w-full btn-primary"><i class="fas fa-plus-circle mr-2"></i>Import Data</button>
+                </div>
+
+                <div class="control-panel-section">
+                    <h2 class="text-2xl font-semibold mb-5 flex items-center text-blue-400">
+                        <i class="fas fa-users mr-2"></i>Player Selection
+                    </h2>
+                    <div class="flex space-x-2 mb-3">
+                        <button id="select-all-players-btn" class="btn-secondary text-xs">Select All</button>
+                        <button id="deselect-all-players-btn" class="btn-secondary text-xs">Deselect All</button>
+                    </div>
+                    <div id="player-checkboxes" class="space-y-3 max-h-80 overflow-y-auto p-1">
+                        <p id="player-loading-message" class="text-gray-400">Loading players...</p>
+                    </div>
+                </div>
+
+                <div class="control-panel-section">
+                    <h2 class="text-2xl font-semibold mb-5 flex items-center text-blue-400">
+                        <i class="fas fa-sliders-h mr-2"></i>Chart Configuration
+                    </h2>
+                    </div>
+            </div>
+
+            <div class="lg:col-span-8">
+                </div>
+        </div>
+    </div>
+
+    <div id="import-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-blue-400">Upload Your Player Files</h2>
+                <button id="close-import-modal-btn" class="text-2xl text-gray-500 hover:text-white">&times;</button>
+            </div>
+            <form id="upload-form" class="space-y-6">
+                <div>
+                    <label for="stats-file-input" class="block mb-2 font-medium text-gray-300">1. Select Your Stats File <span class="text-red-400">*</span></label>
+                    <p class="text-xs text-gray-400 mb-2">Required. The filename must be your UUID (e.g., `123e4567-e89b-12d3-a456-426614174000.json`).</p>
+                    <input type="file" id="stats-file-input" name="stats_file" class="w-full" accept=".json" required>
+                    <p id="stats-file-feedback" class="text-sm text-yellow-400 mt-1"></p>
+                </div>
+                <div>
+                    <label for="advancements-file-input" class="block mb-2 font-medium text-gray-300">2. Select Your Advancements File</label>
+                    <p class="text-xs text-gray-400 mb-2">Optional. Should have the same UUID filename.</p>
+                    <input type="file" id="advancements-file-input" name="advancements_file" class="w-full" accept=".json">
+                </div>
+                <div id="upload-status" class="text-center p-3 rounded-md hidden"></div>
+                <button id="submit-upload-btn" type="submit" class="w-full btn-primary" disabled>
+                    <i id="upload-spinner" class="fas fa-sync-alt fa-spin mr-2 hidden"></i>Upload Files
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    // ... (the entire script block from the original index.html goes here, with the additions below)
+    
+    // Near the top of the 'DOMContentLoaded' event listener, add the new element selectors:
+    const showImportModalBtn = document.getElementById('show-import-modal-btn');
+    const importModal = document.getElementById('import-modal');
+    const closeImportModalBtn = document.getElementById('close-import-modal-btn');
+    const uploadForm = document.getElementById('upload-form');
+    const statsFileInput = document.getElementById('stats-file-input');
+    const advancementsFileInput = document.getElementById('advancements-file-input');
+    const submitUploadBtn = document.getElementById('submit-upload-btn');
+    const uploadStatus = document.getElementById('upload-status');
+    const uploadSpinner = document.getElementById('upload-spinner');
+    const statsFileFeedback = document.getElementById('stats-file-feedback');
+
+    // Add these new functions and event listeners inside the 'DOMContentLoaded' callback
+    
+    // --- Import Modal Logic ---
+    showImportModalBtn.addEventListener('click', () => {
+        importModal.classList.remove('hidden');
+    });
+
+    closeImportModalBtn.addEventListener('click', () => {
+        importModal.classList.add('hidden');
+    });
+    
+    // Simple regex for client-side UUID validation
+    const isUuid = (filename) => /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}\.json$/i.test(filename);
+
+    statsFileInput.addEventListener('change', () => {
+        const file = statsFileInput.files[0];
+        if (file) {
+            if (isUuid(file.name)) {
+                statsFileFeedback.textContent = `Valid UUID found: ${file.name.split('.')[0]}`;
+                statsFileFeedback.className = 'text-sm text-green-400 mt-1';
+                submitUploadBtn.disabled = false;
+            } else {
+                statsFileFeedback.textContent = 'Invalid filename. Must be a UUID (e.g., xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.json)';
+                statsFileFeedback.className = 'text-sm text-red-400 mt-1';
+                submitUploadBtn.disabled = true;
+            }
+        } else {
+            submitUploadBtn.disabled = true;
+            statsFileFeedback.textContent = '';
+        }
+    });
+
+    uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        submitUploadBtn.disabled = true;
+        uploadSpinner.classList.remove('hidden');
+        uploadStatus.classList.add('hidden');
+
+        const formData = new FormData();
+        formData.append('stats_file', statsFileInput.files[0]);
+        if (advancementsFileInput.files.length > 0) {
+            formData.append('advancements_file', advancementsFileInput.files[0]);
+        }
+
+        try {
+            const response = await fetch('/api/upload_data', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                uploadStatus.className = 'text-center p-3 rounded-md bg-green-800 text-green-200';
+                uploadStatus.textContent = result.message;
+                uploadStatus.classList.remove('hidden');
+                
+                // Refresh player list after a short delay
+                setTimeout(() => {
+                    importModal.classList.add('hidden');
+                    fetchPlayers(); // Re-fetch the player list to include the new user
+                    // Reset form
+                    uploadForm.reset();
+                    statsFileFeedback.textContent = '';
+                }, 2000);
+
+            } else {
+                throw new Error(result.error || 'An unknown error occurred.');
+            }
+        } catch (error) {
+            uploadStatus.className = 'text-center p-3 rounded-md bg-red-800 text-red-200';
+            uploadStatus.textContent = `Error: ${error.message}`;
+            uploadStatus.classList.remove('hidden');
+        } finally {
+            submitUploadBtn.disabled = false;
+            uploadSpinner.classList.add('hidden');
+        }
+    });
+
+    // Make sure the rest of your original JavaScript follows here.
+    </script>
+</body>
+</html>

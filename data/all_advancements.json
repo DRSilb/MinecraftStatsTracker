@@ -264,6 +264,12 @@
     "orig": "adventure/whos_the_pillager_now"
   },
   {
+    "cat": "adventure",
+    "name": "Heart Transplanter",
+    "desc": "Place a Creaking Heart with the correct alignment between two Pale Oak Log Blocks.",
+    "orig": "adventure/heart_transplanter"
+  },
+  {
     "cat": "end",
     "name": "You Need a Mint",
     "desc": "Collect Dragon's Breath in a Glass Bottle",
@@ -478,6 +484,12 @@
     "name": "Whole Pack",
     "desc": "Tame one of each Wolf variant.",
     "orig": "husbandry/whole_pack"
+  },
+  {
+    "cat": "husbandry",
+    "name": "Stay Hydrated!",
+    "desc": "Place a Dried Ghast block into water.",
+    "orig": "husbandry/place_dried_ghast_in_water"
   },
   {
     "cat": "nether",

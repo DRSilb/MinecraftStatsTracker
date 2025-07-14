@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 app = Flask(__name__)
 CORS(app)
-project_folder = '/home/DRSilb/MinecraftStatsTracker'
+project_folder = '/home/DRSilb/VSCODE/MinecraftStatsTracker/MinecraftStatsTracker'
 logging.info(f"Using project folder path: {project_folder}")
 DATA_DIR = os.path.join(project_folder, 'data')
 logging.info(f"Constructed DATA_DIR path is: {DATA_DIR}")
