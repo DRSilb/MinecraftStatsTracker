@@ -1,5 +1,7 @@
 # Minecraft Stats & Advancements Dashboard
  A tool that tracks Minecraft Stats and Advancements from a live server by parsing user stat/advancement(.json) files and then using it to create visualizations. 
+ 
+<img width="25%" height="25%" alt="image" src="https://github.com/user-attachments/assets/8daf34fa-cd57-4fb2-9d79-c5a2b9ef271c" />
 
 Visit:
 https://minecraftstatstracker.com/
