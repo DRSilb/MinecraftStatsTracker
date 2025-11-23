@@ -1451,7 +1451,8 @@
     "criteria": {
       "minecraft:cow": "2025-03-13 01:34:59 -0400",
       "minecraft:turtle": "2025-05-03 21:06:38 -0400",
-      "minecraft:sheep": "2025-03-13 02:28:49 -0400"
+      "minecraft:sheep": "2025-03-13 02:28:49 -0400",
+      "minecraft:axolotl": "2025-07-20 14:17:35 -0400"
     },
     "done": false
   },
@@ -7196,15 +7197,147 @@
     },
     "done": true
   },
+  "minecraft:recipes/misc/orange_dye_from_torchflower": {
+    "criteria": {
+      "has_torchflower": "2025-07-12 23:21:11 -0400"
+    },
+    "done": true
+  },
   "minecraft:nether/all_potions": {
     "criteria": {
       "all_effects": "2025-07-13 00:03:28 -0400"
     },
     "done": true
   },
-  "minecraft:recipes/misc/orange_dye_from_torchflower": {
+  "minecraft:recipes/combat/dye_gray_harness": {
     "criteria": {
-      "has_torchflower": "2025-07-12 23:21:11 -0400"
+      "has_needed_dye": "2025-07-19 17:06:54 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/dye_gray_carpet": {
+    "criteria": {
+      "has_needed_dye": "2025-07-19 17:06:54 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/dye_gray_bed": {
+    "criteria": {
+      "has_needed_dye": "2025-07-19 17:06:54 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/combat/saddle": {
+    "criteria": {
+      "has_leather": "2025-07-20 13:33:22 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/building_blocks/stripped_birch_wood": {
+    "criteria": {
+      "has_log": "2025-07-31 11:51:38 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/birch_hanging_sign": {
+    "criteria": {
+      "has_stripped_logs": "2025-07-31 11:51:38 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/combat/dye_white_harness": {
+    "criteria": {
+      "has_needed_dye": "2025-08-05 14:06:54 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/dye_white_carpet": {
+    "criteria": {
+      "has_needed_dye": "2025-08-05 14:06:54 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/dye_white_bed": {
+    "criteria": {
+      "has_needed_dye": "2025-08-05 14:06:54 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/dye_red_bed": {
+    "criteria": {
+      "has_needed_dye": "2025-08-05 15:30:05 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/dye_red_carpet": {
+    "criteria": {
+      "has_needed_dye": "2025-08-05 15:30:05 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/combat/dye_red_harness": {
+    "criteria": {
+      "has_needed_dye": "2025-08-05 15:30:05 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/dye_blue_carpet": {
+    "criteria": {
+      "has_needed_dye": "2025-08-12 22:07:49 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/dye_blue_bed": {
+    "criteria": {
+      "has_needed_dye": "2025-08-12 22:07:49 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/combat/dye_blue_harness": {
+    "criteria": {
+      "has_needed_dye": "2025-08-12 22:07:49 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/dye_purple_carpet": {
+    "criteria": {
+      "has_needed_dye": "2025-08-12 22:07:51 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/combat/dye_purple_harness": {
+    "criteria": {
+      "has_needed_dye": "2025-08-12 22:07:51 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/dye_purple_bed": {
+    "criteria": {
+      "has_needed_dye": "2025-08-12 22:07:51 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/purple_stained_glass_pane": {
+    "criteria": {
+      "has_glass": "2025-08-12 22:11:14 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/combat/dye_pink_harness": {
+    "criteria": {
+      "has_needed_dye": "2025-09-26 22:13:59 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/dye_pink_carpet": {
+    "criteria": {
+      "has_needed_dye": "2025-09-26 22:13:59 -0400"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/dye_pink_bed": {
+    "criteria": {
+      "has_needed_dye": "2025-09-26 22:13:59 -0400"
     },
     "done": true
   },
